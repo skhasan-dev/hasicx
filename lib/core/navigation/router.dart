@@ -6,6 +6,7 @@ import 'package:hasicx/features/home/presentation/home_view.dart';
 import 'package:hasicx/features/player/presentation/player_view.dart';
 import 'package:hasicx/features/playlist/presentation/playlist_songs_view.dart';
 import 'package:hasicx/features/playlist/presentation/recent_songs_view.dart';
+import 'package:hasicx/features/search/presentation/search_view.dart';
 
 GoRouter appRouter = GoRouter(
   initialLocation: RouteNames.splash,
@@ -24,6 +25,11 @@ GoRouter appRouter = GoRouter(
       path: '/player',
       name: RouteNames.player,
       builder: (_, _) => PlayerView(),
+    ),
+    GoRoute(
+      path: '/search',
+      name: RouteNames.search,
+      builder: (_, _) => SearchView(),
     ),
     GoRoute(
       path: '/recently-added',

@@ -7,4 +7,5 @@ class RouteNames {
   static String playlistSong = 'playlist-song';
   static String songSelection = 'song-selection';
   static String recentlyAdded = 'recently-added';
+  static String search = 'search';
 }

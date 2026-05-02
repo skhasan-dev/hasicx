@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:hasicx/features/favourites/presentation/favourites_view.dart';
@@ -34,14 +35,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           actions: [
             IconButton(
               onPressed: () {
-                // if (player.isSearchEnabled.value) {
-                //   player.isSearchEnabled.value = false;
-                //   setState(() {
-                //     searchQuery = '';
-                //   });
-                // } else {
-                //   player.isSearchEnabled.value = true;
-                // }
+                context.pushNamed(RouteNames.search);
               },
               icon: Icon(Icons.search, color: AppColors.textColor),
             ),

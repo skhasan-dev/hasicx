@@ -181,28 +181,33 @@ class _PlayerViewState extends State<PlayerView> {
                             horizontal: 16,
                           ),
                           child: Row(
+                            spacing: 16,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Now Playing",
-                                    style: AppTextStyles.s14W600,
-                                  ),
-                                  // ValueListenableBuilder(
-                                  //   valueListenable: loopModeNotifer,
-                                  //   builder: (context, value, child) {
-                                  //     return Text(
-                                  //       'Repeat ${value.name}',
-                                  //       style: AppTextStyles.s14W400,
-                                  //       overflow: TextOverflow.ellipsis,
-                                  //       maxLines: 1,
-                                  //     );
-                                  //   },
-                                  // ),
-                                ],
+                              Selector<MusicPlayerProvider, Song?>(
+                                selector: (_, vm) => vm.currentyPlaying,
+                                builder: (context, song, child) {
+                                  return Flexible(
+                                    child: Column(
+                                      spacing: 4,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Now Playing",
+                                          style: AppTextStyles.s14W600,
+                                        ),
+                                        Text(
+                                          song?.name ?? '-',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTextStyles.s12W400,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
+
                               Row(
                                 children: [
                                   Selector<MusicPlayerProvider, LoopMode>(
@@ -227,27 +232,32 @@ class _PlayerViewState extends State<PlayerView> {
                                       );
                                     },
                                   ),
-                                  ValueListenableBuilder(
-                                    valueListenable: isListEnabledNotifer,
-                                    builder: (context, value, child) {
-                                      return IconButton(
-                                        onPressed: () {
-                                          isListEnabledNotifer.value = !value;
-                                        },
-                                        icon: value
-                                            ? Icon(
-                                                Icons.keyboard_arrow_down,
-                                                color: AppColors.textColor,
-                                                size: 30,
-                                              )
-                                            : Icon(
-                                                Icons.keyboard_arrow_up,
-                                                color: AppColors.textColor,
-                                                size: 30,
-                                              ),
-                                      );
-                                    },
-                                  ),
+
+                                  if (musicPlayerProvider
+                                          .currentPlayingSongs
+                                          .length >
+                                      1)
+                                    ValueListenableBuilder(
+                                      valueListenable: isListEnabledNotifer,
+                                      builder: (context, value, child) {
+                                        return IconButton(
+                                          onPressed: () {
+                                            isListEnabledNotifer.value = !value;
+                                          },
+                                          icon: value
+                                              ? Icon(
+                                                  Icons.keyboard_arrow_down,
+                                                  color: AppColors.textColor,
+                                                  size: 30,
+                                                )
+                                              : Icon(
+                                                  Icons.keyboard_arrow_up,
+                                                  color: AppColors.textColor,
+                                                  size: 30,
+                                                ),
+                                        );
+                                      },
+                                    ),
                                 ],
                               ),
                             ],
