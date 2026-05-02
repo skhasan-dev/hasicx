@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart'
-    show AppTextStyles, AppColors, SongTile, MiniPlayer, NoDataFound;
+    show AppTextStyles, AppColors, SongTile, NoDataFound;
 import 'package:hasicx/core/index.dart'
     show
         MusicPlayerProvider,
         Playlist,
         Song,
-        PlayerState,
         getIt,
         FailureExt,
         AppToasts,
         AppUtils,
-        RouteNames;
+        RouteNames,
+        AdvanceMiniPlayer;
 import 'package:hasicx/features/playlist/index.dart'
     show PlaylistSongsViewModel;
 import 'package:provider/provider.dart';
@@ -198,30 +198,7 @@ class _PlaylistSongsViewState extends State<PlaylistSongsView> {
                 ),
         ),
 
-        bottomNavigationBar: Selector<MusicPlayerProvider, PlayerState>(
-          selector: (_, vm) => vm.playerState,
-          builder: (_, state, _) {
-            if (state == PlayerState.idle) return SizedBox.shrink();
-
-            return Selector<MusicPlayerProvider, int>(
-              selector: (_, vm) => vm.currentIndex,
-              builder: (_, index, _) => MiniPlayer(
-                playerState: state,
-                songs: musicPlayerProvider.currentPlayingSongs,
-                currentIndex: index,
-                onPlayPauseCallback: (isPlaying) {
-                  if (isPlaying) {
-                    musicPlayerProvider.pauseSong();
-                  } else {
-                    musicPlayerProvider.resumeSong();
-                  }
-                },
-                onSkip: musicPlayerProvider.playNext,
-                onPrev: musicPlayerProvider.playPrevious,
-              ),
-            );
-          },
-        ),
+        bottomNavigationBar: AdvanceMiniPlayer(),
       ),
     );
   }

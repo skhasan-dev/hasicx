@@ -7,3 +7,4 @@ export 'extensions/index.dart';
 export 'utils/index.dart';
 export 'failures/index.dart';
 export 'repository/index.dart';
+export 'widgets/index.dart';

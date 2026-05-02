@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart';
 import 'package:hasicx/core/index.dart';
+import 'package:hasicx/core/widgets/index.dart';
 import 'package:hasicx/features/favourites/presentation/favourites_view.dart';
 import 'package:hasicx/features/home/presentation/view_models/home_view_model.dart';
 import 'package:hasicx/features/home/presentation/widgets/dashboard.dart';
@@ -62,30 +63,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           children: [Dashboard(), FavouritesView(), PlaylistView()],
         ),
 
-        bottomNavigationBar: Selector<MusicPlayerProvider, PlayerState>(
-          selector: (_, vm) => vm.playerState,
-          builder: (_, state, _) {
-            if (state == PlayerState.idle) return SizedBox.shrink();
-
-            return Selector<MusicPlayerProvider, int>(
-              selector: (_, vm) => vm.currentIndex,
-              builder: (_, index, _) => MiniPlayer(
-                playerState: state,
-                songs: player.currentPlayingSongs,
-                currentIndex: index,
-                onPlayPauseCallback: (isPlaying) {
-                  if (isPlaying) {
-                    player.pauseSong();
-                  } else {
-                    player.resumeSong();
-                  }
-                },
-                onSkip: player.playNext,
-                onPrev: player.playPrevious,
-              ),
-            );
-          },
-        ),
+        bottomNavigationBar: AdvanceMiniPlayer(),
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hasicx/common/index.dart'
-    show AppColors, AppTextStyles, MiniPlayer, NoDataFound;
+    show AppColors, AppTextStyles, NoDataFound;
 import 'package:hasicx/common/widgets/song_tile.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:hasicx/features/search/presentation/view_model/search_view_model.dart';
@@ -99,30 +99,7 @@ class _SearchViewState extends State<SearchView> {
           },
         ),
 
-        bottomNavigationBar: Selector<MusicPlayerProvider, PlayerState>(
-          selector: (_, vm) => vm.playerState,
-          builder: (_, state, _) {
-            if (state == PlayerState.idle) return SizedBox.shrink();
-
-            return Selector<MusicPlayerProvider, int>(
-              selector: (_, vm) => vm.currentIndex,
-              builder: (_, index, _) => MiniPlayer(
-                playerState: state,
-                songs: musicPlayerProvider.currentPlayingSongs,
-                currentIndex: index,
-                onPlayPauseCallback: (isPlaying) {
-                  if (isPlaying) {
-                    musicPlayerProvider.pauseSong();
-                  } else {
-                    musicPlayerProvider.resumeSong();
-                  }
-                },
-                onSkip: musicPlayerProvider.playNext,
-                onPrev: musicPlayerProvider.playPrevious,
-              ),
-            );
-          },
-        ),
+        bottomNavigationBar: AdvanceMiniPlayer(),
       ),
     );
   }
