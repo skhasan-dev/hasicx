@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hasicx/common/index.dart' show AppTextStyles;
+import 'package:hasicx/common/index.dart' show AppTextStyles, NoDataFound;
 import 'package:hasicx/common/widgets/song_tile.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:hasicx/features/favourites/presentation/view_models/favourites_view_model.dart';
@@ -42,9 +42,17 @@ class _FavouritesViewState extends State<FavouritesView> {
                 builder: (context, songs, _) {
                   if (songs.isEmpty) {
                     return Center(
-                      child: Text(
-                        "No Favourite Songs Found",
-                        style: AppTextStyles.s18W400,
+                      child: NoDataFound(
+                        icon: Icon(Icons.favorite_outline, size: 96),
+                        title: Text(
+                          "No favorite songs yet",
+                          style: AppTextStyles.s16W600,
+                        ),
+                        subtitle: Text(
+                          "Add songs to your favorites to see them here",
+                          style: AppTextStyles.s12W400,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     );
                   }

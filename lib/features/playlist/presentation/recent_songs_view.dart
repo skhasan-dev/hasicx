@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hasicx/common/index.dart'
-    show AppTextStyles, AppColors, SongTile, MiniPlayer;
+    show AppTextStyles, AppColors, SongTile, MiniPlayer, NoDataFound;
 import 'package:hasicx/core/index.dart'
     show MusicPlayerProvider, PlayerState, getIt, SharedPrefs;
 import 'package:hasicx/features/playlist/index.dart' show PlaylistUtils;
@@ -40,9 +40,16 @@ class _RecentSongsViewState extends State<RecentSongsView> {
 
           if (songs.isEmpty) {
             return Center(
-              child: Text(
-                'No Songs Added in the Playlist',
-                style: AppTextStyles.s18W400,
+              child: NoDataFound(
+                icon: Icon(Icons.history, size: 96),
+                title: Text(
+                  "No recently added songs",
+                  style: AppTextStyles.s16W600,
+                ),
+                subtitle: Text(
+                  "Songs you add will appear here.",
+                  style: AppTextStyles.s12W400,
+                ),
               ),
             );
           }

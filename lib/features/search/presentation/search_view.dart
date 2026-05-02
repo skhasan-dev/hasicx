@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hasicx/common/index.dart'
-    show AppColors, AppTextStyles, MiniPlayer;
+    show AppColors, AppTextStyles, MiniPlayer, NoDataFound;
 import 'package:hasicx/common/widgets/song_tile.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:hasicx/features/search/presentation/view_model/search_view_model.dart';
@@ -67,7 +67,20 @@ class _SearchViewState extends State<SearchView> {
         body: Consumer<SearchViewModel>(
           builder: (vmContext, vm, _) {
             if (vm.result.isEmpty) {
-              return Center(child: Text('No Songs Found'));
+              return Center(
+                child: NoDataFound(
+                  icon: Icon(Icons.search_off, size: 96),
+                  title: Text(
+                    "No matching songs found",
+                    style: AppTextStyles.s16W600,
+                  ),
+                  subtitle: Text(
+                    "Try searching with a different song name.",
+                    style: AppTextStyles.s12W400,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
             }
 
             return ListView.builder(

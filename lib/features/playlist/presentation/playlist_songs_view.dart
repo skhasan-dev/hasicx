@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart'
-    show AppTextStyles, AppColors, SongTile, MiniPlayer;
+    show AppTextStyles, AppColors, SongTile, MiniPlayer, NoDataFound;
 import 'package:hasicx/core/index.dart'
     show
         MusicPlayerProvider,
@@ -59,9 +59,30 @@ class _PlaylistSongsViewState extends State<PlaylistSongsView> {
           builder: (_, songs, _) {
             if (songs.isEmpty) {
               return Center(
-                child: Text(
-                  'No Songs Added in the Playlist',
-                  style: AppTextStyles.s18W400,
+                child: NoDataFound(
+                  icon: Icon(Icons.music_note, size: 96),
+                  title: Text(
+                    "No songs in this playlist",
+                    style: AppTextStyles.s16W600,
+                  ),
+                  subtitle: Text(
+                    "Add songs to start building your playlist.",
+                    style: AppTextStyles.s12W400,
+                  ),
+                  actionText: 'Add Songs',
+                  onPressed: () async {
+                    final songs = await context.pushNamed(
+                      RouteNames.songSelection,
+                      extra: musicPlayerProvider.allSongs,
+                    );
+
+                    if (songs is List<Song>) {
+                      playlistSongsViewModel.addSongsPlaylist(
+                        widget.playlist,
+                        songs,
+                      );
+                    }
+                  },
                 ),
               );
             }
@@ -154,19 +175,27 @@ class _PlaylistSongsViewState extends State<PlaylistSongsView> {
           },
         ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final songs = await context.pushNamed(
-              RouteNames.songSelection,
-              extra: musicPlayerProvider.allSongs,
-            );
+        floatingActionButton: Selector<PlaylistSongsViewModel, bool>(
+          selector: (_, vm) => vm.songs.isEmpty,
+          builder: (_, hideButton, _) => hideButton
+              ? SizedBox.shrink()
+              : FloatingActionButton(
+                  onPressed: () async {
+                    final songs = await context.pushNamed(
+                      RouteNames.songSelection,
+                      extra: musicPlayerProvider.allSongs,
+                    );
 
-            if (songs is List<Song>) {
-              playlistSongsViewModel.addSongsPlaylist(widget.playlist, songs);
-            }
-          },
-          backgroundColor: AppColors.buttonColor,
-          child: Icon(Icons.add, color: AppColors.buttonTxtColor),
+                    if (songs is List<Song>) {
+                      playlistSongsViewModel.addSongsPlaylist(
+                        widget.playlist,
+                        songs,
+                      );
+                    }
+                  },
+                  backgroundColor: AppColors.buttonColor,
+                  child: Icon(Icons.add, color: AppColors.buttonTxtColor),
+                ),
         ),
 
         bottomNavigationBar: Selector<MusicPlayerProvider, PlayerState>(

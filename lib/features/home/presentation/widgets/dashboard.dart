@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hasicx/common/theme/text_styles.dart';
+import 'package:hasicx/common/widgets/no_data_found.dart';
 import 'package:hasicx/common/widgets/song_tile.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:hasicx/features/home/presentation/view_models/home_view_model.dart';
@@ -25,7 +26,18 @@ class Dashboard extends StatelessWidget {
               builder: (context, songs, _) {
                 if (songs.isEmpty) {
                   return Center(
-                    child: Text("No Songs Found", style: AppTextStyles.s18W400),
+                    child: NoDataFound(
+                      icon: Icon(Icons.music_note, size: 96),
+                      title: Text(
+                        "No songs available",
+                        style: AppTextStyles.s16W600,
+                      ),
+                      subtitle: Text(
+                        "Looks like your library is empty. Add songs to get started.",
+                        style: AppTextStyles.s12W400,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   );
                 }
 
