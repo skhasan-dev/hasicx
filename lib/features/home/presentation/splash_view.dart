@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -15,10 +16,14 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
+  bool _isHandled = false;
+
   @override
   void initState() {
-    checkPermission();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkPermission();
+    });
   }
 
   @override
@@ -50,45 +55,58 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> checkPermission() async {
-    var perms = await Permission.storage.request();
-    var perms2 = await Permission.audio.request();
+    if (_isHandled) return;
 
-    if (!perms.isGranted && !perms2.isGranted) {
-      showDialog(
+    var storage = await Permission.storage.request();
+    var audio = await Permission.audio.request();
+
+    if (!mounted) return;
+
+    if (!storage.isGranted && !audio.isGranted) {
+      _isHandled = true;
+
+      await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
           title: Text("Permission Required", style: AppTextStyles.s18W400),
           content: Text(
-            "Permission is needed to access audios and songs.",
+            "Access to audio files is required to display your music library.",
             style: AppTextStyles.s14W400,
           ),
           backgroundColor: AppColors.deepTabColor,
           actions: [
             OutlinedButton(
-              onPressed: () {
-                exit(0);
-              },
-              child: Text("Cancel", style: AppTextStyles.s12W400),
+              onPressed: () => exit(0),
+              child: Text("Exit", style: AppTextStyles.s12W400),
             ),
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(context);
                 await openAppSettings();
-                await checkPermission();
+                _isHandled = false; // allow retry
+                if (mounted) checkPermission();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.tabColor,
               ),
-              child: Text("Open App Settings", style: AppTextStyles.s12W400),
+              child: Text("Open Settings", style: AppTextStyles.s12W400),
             ),
           ],
         ),
       );
     } else {
-      Timer(Duration(seconds: 3), () {
-        context.pushReplacementNamed(RouteNames.home);
-      });
+      _isHandled = true;
+
+      await Future.delayed(const Duration(seconds: 3));
+
+      if (!mounted) return;
+
+      await context.read<MusicPlayerProvider>().getSongs();
+
+      if (!mounted) return;
+
+      context.pushReplacementNamed(RouteNames.home);
     }
   }
 }
