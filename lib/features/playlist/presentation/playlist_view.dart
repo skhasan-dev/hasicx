@@ -39,10 +39,14 @@ class _PlaylistViewState extends State<PlaylistView> {
                 child: CircularProgressIndicator(color: AppColors.buttonColor),
               );
             }
-            return SingleChildScrollView(
-              padding: EdgeInsets.only(top: 12, bottom: 8),
-              physics: AlwaysScrollableScrollPhysics(),
-              child: Column(
+            return RefreshIndicator(
+              onRefresh: () async {
+                final failure = await playlistViewModel.getPlaylists();
+                failure?.showToast();
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
                 children: [
                   PlaylistTile(
                     title: 'Recently Added',
@@ -51,45 +55,50 @@ class _PlaylistViewState extends State<PlaylistView> {
                       context.pushNamed(RouteNames.recentlyAdded);
                     },
                   ),
-                  Divider(),
+                  const Divider(),
+
                   Selector<PlaylistViewModel, List<Playlist>>(
                     selector: (_, vm) => vm.playlists,
-                    builder: (_, playlists, _) => ListView.separated(
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (_, index) {
-                        final playlist = playlists[index];
-                        return PlaylistTile(
-                          title: playlist.name,
-                          leading: Icons.playlist_play,
-                          onLongPress: () {
-                            AppUtils.showDeleteDialog(
-                              context,
-                              isSong: false,
-                              onDelete: () async {
-                                final failure = await playlistViewModel
-                                    .deletePlaylist(playlist);
-                                if (failure != null) {
-                                  failure.showToast();
-                                } else {
-                                  final failure = await playlistViewModel
-                                      .getPlaylists();
-                                  failure?.showToast();
-                                }
-                              },
-                            );
-                          },
-                          onTap: () {
-                            context.pushNamed(
-                              RouteNames.playlistSong,
-                              extra: playlist,
-                            );
-                          },
-                        );
-                      },
-                      itemCount: playlists.length,
-                      shrinkWrap: true,
-                      separatorBuilder: (_, _) => Divider(),
-                    ),
+                    builder: (_, playlists, _) {
+                      return Column(
+                        children: List.generate(playlists.length, (index) {
+                          final playlist = playlists[index];
+                          return Column(
+                            children: [
+                              PlaylistTile(
+                                title: playlist.name,
+                                leading: Icons.playlist_play,
+                                onLongPress: () {
+                                  AppUtils.showDeleteDialog(
+                                    context,
+                                    isSong: false,
+                                    onDelete: () async {
+                                      final failure = await playlistViewModel
+                                          .deletePlaylist(playlist);
+
+                                      if (failure != null) {
+                                        failure.showToast();
+                                      } else {
+                                        final failure = await playlistViewModel
+                                            .getPlaylists();
+                                        failure?.showToast();
+                                      }
+                                    },
+                                  );
+                                },
+                                onTap: () {
+                                  context.pushNamed(
+                                    RouteNames.playlistSong,
+                                    extra: playlist,
+                                  );
+                                },
+                              ),
+                              const Divider(),
+                            ],
+                          );
+                        }),
+                      );
+                    },
                   ),
                 ],
               ),

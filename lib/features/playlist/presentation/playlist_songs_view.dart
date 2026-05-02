@@ -68,6 +68,7 @@ class _PlaylistSongsViewState extends State<PlaylistSongsView> {
 
             return ListView.separated(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              physics: BouncingScrollPhysics(),
               itemBuilder: (_, index) {
                 final song = songs[index];
                 return SongTile(

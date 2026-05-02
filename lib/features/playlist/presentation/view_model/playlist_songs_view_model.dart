@@ -81,7 +81,7 @@ class PlaylistSongsViewModel extends ViewStateProvider {
 
     result.fold((e) => failure = e, (r) async {
       {
-        await getSongs(playlistName);
+        songs = r;
       }
     });
 

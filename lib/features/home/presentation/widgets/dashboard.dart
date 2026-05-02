@@ -30,6 +30,7 @@ class Dashboard extends StatelessWidget {
                 }
 
                 return ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   itemCount: songs.length,
                   itemBuilder: (context, index) {
                     var song = songs[index];

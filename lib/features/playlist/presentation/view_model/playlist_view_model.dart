@@ -57,7 +57,7 @@ class PlaylistViewModel extends ViewStateProvider {
     final result = await _localRepository.getPlaylists();
 
     result.fold((e) => failure = e, (r) async {
-      await getPlaylists(showLoading: false);
+      playlists = r;
     });
 
     if (showLoading) setViewState(ViewState.complete);

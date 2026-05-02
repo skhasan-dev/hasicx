@@ -71,6 +71,7 @@ class _SearchViewState extends State<SearchView> {
             }
 
             return ListView.builder(
+              physics: BouncingScrollPhysics(),
               padding: EdgeInsets.all(20),
               itemBuilder: (_, index) {
                 return SongTile(
