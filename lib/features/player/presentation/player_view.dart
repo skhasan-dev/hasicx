@@ -178,19 +178,22 @@ class _PlayerViewState extends State<PlayerView> {
                           PlayBox(showQueue: showQueue),
 
                           if (showQueue)
-                            QueueBox(
-                              currentIndex: musicPlayerProvider.currentIndex,
-                              songs: musicPlayerProvider.currentPlayingSongs,
-                              onSongSelect: (index) {
-                                musicPlayerProvider.playSong(index);
-                                playerViewModel.toggleQueueVisibility();
-                              },
-                              onRemoveSong: (index) async {
-                                await musicPlayerProvider.removeFromQueue(
-                                  index,
-                                );
-                                playerViewModel.toggleQueueVisibility();
-                              },
+                            Selector<MusicPlayerProvider, int>(
+                              selector: (_, vm) => vm.currentIndex,
+                              builder: (_, currentIndex, _) => QueueBox(
+                                currentIndex: currentIndex,
+                                songs: musicPlayerProvider.currentPlayingSongs,
+                                onSongSelect: (index) {
+                                  musicPlayerProvider.playSong(index);
+                                  playerViewModel.toggleQueueVisibility();
+                                },
+                                onRemoveSong: (index) async {
+                                  await musicPlayerProvider.removeFromQueue(
+                                    index,
+                                  );
+                                  playerViewModel.toggleQueueVisibility();
+                                },
+                              ),
                             ),
                         ],
                       );

@@ -305,7 +305,13 @@ class MusicPlayerProvider extends ViewStateProvider {
     player.positionStream.listen((p) {
       if (!isUserDragging) {
         currentTime = p.toString().split(".")[0];
-        currentSliderValue = p.inSeconds.toDouble();
+        double value = p.inSeconds.toDouble();
+        if (value <= maxSliderValue) {
+          currentSliderValue = value;
+          if (currentSliderValue == maxSliderValue && !player.hasNext) {
+            pauseSong();
+          }
+        }
         notifyListeners();
       }
     });
