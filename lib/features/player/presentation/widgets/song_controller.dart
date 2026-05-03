@@ -25,7 +25,7 @@ class SongController extends StatelessWidget {
                   onChangeEnd: (value) => vm.seekTo(value),
                   onChanged: vm.updateSliderUI,
                   min: Duration(seconds: 0).inSeconds.toDouble(),
-                  max: vm.maxSliderValue > 0.0 ? vm.maxSliderValue : 1.0,
+                  max: vm.maxSliderValue > 0.0 ? vm.maxSliderValue : 999,
                 ),
               ),
               Text(vm.length, style: AppTextStyles.s12W400),
@@ -36,15 +36,22 @@ class SongController extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton(
-              onPressed: () {
-                musicPlayerProvider.playPrevious();
-                // getFav();
-              },
-              icon: Icon(
-                Icons.skip_previous,
-                color: AppColors.textColor,
-                size: 40,
+            Selector<MusicPlayerProvider, bool>(
+              selector: (_, vm) => vm.player.hasPrevious,
+              builder: (_, hasPrevious, _) => IconButton(
+                onPressed: hasPrevious
+                    ? () {
+                        musicPlayerProvider.playPrevious();
+                        // getFav();
+                      }
+                    : null,
+                icon: Icon(
+                  Icons.skip_previous,
+                  color: AppColors.textColor.withValues(
+                    alpha: hasPrevious ? 1 : 0.6,
+                  ),
+                  size: 40,
+                ),
               ),
             ),
             InkWell(
@@ -78,12 +85,23 @@ class SongController extends StatelessWidget {
               },
               child: Image.asset("assets/images/fast.png", height: 40),
             ),
-            IconButton(
-              onPressed: () {
-                musicPlayerProvider.playNext();
-                // getFav();
-              },
-              icon: Icon(Icons.skip_next, color: AppColors.textColor, size: 40),
+            Selector<MusicPlayerProvider, bool>(
+              selector: (_, vm) => vm.player.hasNext,
+              builder: (_, hasNext, _) => IconButton(
+                onPressed: hasNext
+                    ? () {
+                        musicPlayerProvider.playNext();
+                        // getFav();
+                      }
+                    : null,
+                icon: Icon(
+                  Icons.skip_next,
+                  color: AppColors.textColor.withValues(
+                    alpha: hasNext ? 1 : 0.6,
+                  ),
+                  size: 40,
+                ),
+              ),
             ),
           ],
         ),

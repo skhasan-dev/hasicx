@@ -31,9 +31,9 @@ class SharedPrefs {
     return isSaved;
   }
 
-  static LoopMode getLoopMode() {
-    int loopModeIndex = _sharedPreferences.getInt('HASICX_LOOP_MODE') ?? 0;
-    return LoopMode.values[loopModeIndex];
+  static LoopMode? getLoopMode() {
+    int? loopModeIndex = _sharedPreferences.getInt('HASICX_LOOP_MODE');
+    return loopModeIndex == null ? null : LoopMode.values[loopModeIndex];
   }
 
   static Future<bool> setRecentCount(int count) async {

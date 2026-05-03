@@ -1,15 +1,15 @@
-import 'package:get/utils.dart';
 import 'package:hasicx/core/index.dart'
     show
-        ViewStateProvider,
+        AppFailure,
+        Failure,
         LocalRepository,
         PlayerState,
+        SharedPrefs,
         Song,
-        Failure,
-        getIt,
-        ViewState,
         SongModelListExt,
-        AppFailure;
+        ViewState,
+        ViewStateProvider,
+        getIt;
 import 'package:just_audio/just_audio.dart' hide PlayerState;
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -48,32 +48,35 @@ class MusicPlayerProvider extends ViewStateProvider {
     notifyListeners();
   }
 
-  int currentIndexForRemainingSongs(int index) {
-    final curr = remainingSongs[index];
-    final song = currentPlayingSongs.firstWhereOrNull((s) => s.id == curr.id);
-    return song != null ? currentPlayingSongs.indexOf(song) : index;
-  }
+  bool get showListExpandButton => currentPlayingSongs.length > 1;
 
-  List<Song> get remainingSongs {
-    final alreadyPlayed = currentPlayingSongs
-        .getRange(0, currentIndex)
-        .toList();
-    final remainingToPlay = currentPlayingSongs.skip(currentIndex + 1).toList();
-    return loopMode == LoopMode.all
-        ? [...remainingToPlay, ...alreadyPlayed]
-        : remainingToPlay;
-  }
+  // int currentIndexForRemainingSongs(int index) {
+  //   final curr = remainingSongs[index];
+  //   final song = currentPlayingSongs.firstWhereOrNull((s) => s.id == curr.id);
+  //   return song != null ? currentPlayingSongs.indexOf(song) : index;
+  // }
 
-  Song? get currentyPlaying {
-    final length = currentPlayingSongs.length;
-    if (length == 0) {
-      return null;
-    } else if (length == 1) {
-      _currentIndex = 0;
-      return currentPlayingSongs.first;
-    } else {
-      return currentPlayingSongs[currentIndex];
-    }
+  // List<Song> get remainingSongs {
+  //   final alreadyPlayed = currentPlayingSongs
+  //       .getRange(0, currentIndex)
+  //       .toList();
+  //   final remainingToPlay = currentPlayingSongs.skip(currentIndex + 1).toList();
+  //   return loopMode == LoopMode.all
+  //       ? [...remainingToPlay, ...alreadyPlayed]
+  //       : remainingToPlay;
+  // }
+
+  Song get currentyPlaying {
+    // final length = currentPlayingSongs.length;
+    // if (length == 0) {
+    //   return null;
+    // } else if (length == 1) {
+    //   _currentIndex = 0;
+    //   return currentPlayingSongs.first;
+    // } else {
+    //   return currentPlayingSongs[currentIndex];
+    // }
+    return currentPlayingSongs[currentIndex];
   }
 
   bool _isPlayingSongMarkedFavourite = false;
@@ -146,7 +149,7 @@ class MusicPlayerProvider extends ViewStateProvider {
   Future<void> playNext() async {
     if (player.hasNext) {
       player.seekToNext();
-      currentIndex = currentIndex + 1;
+      // currentIndex = currentIndex + 1;
       getIsFav();
       if (!isPlaying) {
         resumeSong();
@@ -157,7 +160,7 @@ class MusicPlayerProvider extends ViewStateProvider {
   Future<void> playPrevious() async {
     if (player.hasPrevious) {
       player.seekToPrevious();
-      currentIndex = currentIndex - 1;
+      // currentIndex = currentIndex - 1;
       getIsFav();
       if (!isPlaying) {
         resumeSong();
@@ -165,11 +168,17 @@ class MusicPlayerProvider extends ViewStateProvider {
     }
   }
 
-  LoopMode _loopMode = LoopMode.all;
+  LoopMode _loopMode = SharedPrefs.getLoopMode() ?? LoopMode.all;
   LoopMode get loopMode => _loopMode;
   set loopMode(LoopMode mode) {
+    setLoopMode(mode);
     _loopMode = mode;
     notifyListeners();
+  }
+
+  void setLoopMode(LoopMode mode) {
+    player.setLoopMode(mode);
+    SharedPrefs.setLoopMode(mode);
   }
 
   Future<String?> getSongs({
@@ -207,7 +216,7 @@ class MusicPlayerProvider extends ViewStateProvider {
       isFav: song == null
           ? !isPlayingSongMarkedFavourite
           : !isSelectedSongFavourite,
-      songId: song?.id ?? currentyPlaying?.id ?? 0,
+      songId: song?.id ?? currentyPlaying.id,
     );
 
     result.fold((e) => failure = e, (r) {
@@ -225,7 +234,7 @@ class MusicPlayerProvider extends ViewStateProvider {
     setViewState(ViewState.busy);
 
     final result = await _localRepository.getIsFav(
-      (song ?? currentyPlaying)?.id,
+      (song ?? currentyPlaying).id,
     );
     result.fold((e) => failure = e, (r) {
       if (song == null) {
@@ -248,7 +257,7 @@ class MusicPlayerProvider extends ViewStateProvider {
   bool isUserDragging = false;
 
   void initPlayer() {
-    player.setLoopMode(LoopMode.all);
+    player.setLoopMode(SharedPrefs.getLoopMode() ?? LoopMode.all);
     player.currentIndexStream.listen((index) async {
       if (index != null) {
         if (currentIndex != index) {
@@ -325,6 +334,28 @@ class MusicPlayerProvider extends ViewStateProvider {
     await _syncQueue(); // 🔥 critical
   }
 
+  Future<void> removeFromQueue(int index) async {
+    if (index < 0 || index >= currentPlayingSongs.length) return;
+
+    final updated = [...currentPlayingSongs];
+
+    updated.removeAt(index);
+
+    // Adjust currentIndex safely
+    if (index < currentIndex) {
+      currentIndex -= 1;
+    } else if (index == currentIndex) {
+      // If current song removed → move to next valid index
+      if (currentIndex >= updated.length) {
+        currentIndex = updated.isEmpty ? 0 : updated.length - 1;
+      }
+    }
+
+    currentPlayingSongs = updated;
+
+    await _syncQueue();
+  }
+
   Future<void> _syncQueue({bool keepPosition = true}) async {
     final currentPosition = player.position;
     final wasPlaying = player.playing;
@@ -351,5 +382,11 @@ class MusicPlayerProvider extends ViewStateProvider {
         ),
       );
     }).toList();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    player.dispose();
   }
 }

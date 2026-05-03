@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart';
 import 'package:hasicx/core/index.dart';
 import 'package:hasicx/features/player/index.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:hasicx/features/player/presentation/widgets/play_box.dart';
+import 'package:hasicx/features/player/presentation/widgets/queue_box.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 
@@ -17,8 +18,6 @@ class PlayerView extends StatefulWidget {
 class _PlayerViewState extends State<PlayerView> {
   final MusicPlayerProvider musicPlayerProvider = getIt<MusicPlayerProvider>();
   final PlayerViewModel playerViewModel = PlayerViewModel();
-
-  ValueNotifier<bool> isListEnabledNotifer = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -48,26 +47,33 @@ class _PlayerViewState extends State<PlayerView> {
               },
             ),
             actions: [
-              IconButton(
-                onPressed: () async {
-                  final failure = await musicPlayerProvider.addToFav();
-                  AppToasts.showFailureToast(failure);
-                },
-                icon: Selector<MusicPlayerProvider, bool>(
-                  selector: (_, vm) => vm.isPlayingSongMarkedFavourite,
-                  builder: (_, isFav, _) {
-                    return isFav
-                        ? Image.asset(
-                            "assets/images/fillHeart.png",
-                            height: 30,
-                            width: 30,
-                          )
-                        : Image.asset(
-                            "assets/images/heart.png",
-                            height: 30,
-                            width: 30,
-                          );
-                  },
+              Selector<MusicPlayerProvider, bool>(
+                selector: (_, vm) => vm.isLoading,
+                builder: (_, isLoading, _) => IconButton(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          final failure = await musicPlayerProvider.addToFav();
+                          AppToasts.showFailureToast(failure);
+                        },
+                  icon: isLoading
+                      ? CircularProgressIndicator()
+                      : Selector<MusicPlayerProvider, bool>(
+                          selector: (_, vm) => vm.isPlayingSongMarkedFavourite,
+                          builder: (_, isFav, _) {
+                            return isFav
+                                ? Image.asset(
+                                    "assets/images/fillHeart.png",
+                                    height: 30,
+                                    width: 30,
+                                  )
+                                : Image.asset(
+                                    "assets/images/heart.png",
+                                    height: 30,
+                                    width: 30,
+                                  );
+                          },
+                        ),
                 ),
               ),
             ],
@@ -111,12 +117,12 @@ class _PlayerViewState extends State<PlayerView> {
                 ),
               ),
               Expanded(
-                child: ValueListenableBuilder(
-                  valueListenable: isListEnabledNotifer,
-                  builder: (context, value, child) {
+                child: Selector<PlayerViewModel, bool>(
+                  selector: (_, vm) => vm.showQueue,
+                  builder: (context, showQueue, child) {
                     return Column(
                       children: [
-                        if (!value)
+                        if (!showQueue)
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
@@ -165,134 +171,20 @@ class _PlayerViewState extends State<PlayerView> {
                             ),
                           ),
 
-                        Container(
-                          width: double.maxFinite,
-                          decoration: BoxDecoration(
-                            color: AppColors.deepTabColor,
-                            borderRadius: value
-                                ? BorderRadius.only(
-                                    topLeft: Radius.circular(16),
-                                    topRight: Radius.circular(16),
-                                  )
-                                : null,
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          child: Row(
-                            spacing: 16,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Selector<MusicPlayerProvider, Song?>(
-                                selector: (_, vm) => vm.currentyPlaying,
-                                builder: (context, song, child) {
-                                  return Flexible(
-                                    child: Column(
-                                      spacing: 4,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Now Playing",
-                                          style: AppTextStyles.s14W600,
-                                        ),
-                                        Text(
-                                          song?.name ?? '-',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: AppTextStyles.s12W400,
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+                        PlayBox(showQueue: showQueue),
 
-                              Row(
-                                children: [
-                                  Selector<MusicPlayerProvider, LoopMode>(
-                                    selector: (_, vm) => vm.loopMode,
-                                    builder: (context, loopMode, child) {
-                                      return IconButton(
-                                        onPressed: () async {
-                                          final next = _nextLoopMode(loopMode);
-                                          musicPlayerProvider.player
-                                              .setLoopMode(next);
-                                          musicPlayerProvider.loopMode = next;
-                                        },
-                                        icon: Icon(
-                                          loopMode == LoopMode.one
-                                              ? Icons.repeat_one
-                                              : Icons.repeat,
-                                          color: loopMode == LoopMode.off
-                                              ? null
-                                              : AppColors.textColor,
-                                          size: 28,
-                                        ),
-                                      );
-                                    },
-                                  ),
-
-                                  if (musicPlayerProvider
-                                          .currentPlayingSongs
-                                          .length >
-                                      1)
-                                    ValueListenableBuilder(
-                                      valueListenable: isListEnabledNotifer,
-                                      builder: (context, value, child) {
-                                        return IconButton(
-                                          onPressed: () {
-                                            isListEnabledNotifer.value = !value;
-                                          },
-                                          icon: value
-                                              ? Icon(
-                                                  Icons.keyboard_arrow_down,
-                                                  color: AppColors.textColor,
-                                                  size: 30,
-                                                )
-                                              : Icon(
-                                                  Icons.keyboard_arrow_up,
-                                                  color: AppColors.textColor,
-                                                  size: 30,
-                                                ),
-                                        );
-                                      },
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        if (value)
-                          Expanded(
-                            child: ColoredBox(
-                              color: AppColors.deepTabColor,
-                              child: ListView.builder(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                shrinkWrap: true,
-                                itemBuilder: (_, index) {
-                                  final songs =
-                                      musicPlayerProvider.remainingSongs;
-                                  final song = songs[index];
-                                  return QueueSongTile(
-                                    song: song,
-                                    onTap: () {
-                                      isListEnabledNotifer.value = false;
-                                      musicPlayerProvider.playSong(
-                                        musicPlayerProvider
-                                            .currentIndexForRemainingSongs(
-                                              index,
-                                            ),
-                                      );
-                                    },
-                                    onMoreTap: () {},
-                                  );
-                                },
-                                itemCount:
-                                    musicPlayerProvider.remainingSongs.length,
-                              ),
-                            ),
+                        if (showQueue)
+                          QueueBox(
+                            currentIndex: musicPlayerProvider.currentIndex,
+                            songs: musicPlayerProvider.currentPlayingSongs,
+                            onSongSelect: (index) {
+                              musicPlayerProvider.playSong(index);
+                              playerViewModel.toggleQueueVisibility();
+                            },
+                            onRemoveSong: (index) async {
+                              await musicPlayerProvider.removeFromQueue(index);
+                              playerViewModel.toggleQueueVisibility();
+                            },
                           ),
                       ],
                     );
@@ -304,16 +196,5 @@ class _PlayerViewState extends State<PlayerView> {
         ),
       ),
     );
-  }
-
-  LoopMode _nextLoopMode(LoopMode mode) {
-    switch (mode) {
-      case LoopMode.off:
-        return LoopMode.all;
-      case LoopMode.all:
-        return LoopMode.one;
-      case LoopMode.one:
-        return LoopMode.off;
-    }
   }
 }

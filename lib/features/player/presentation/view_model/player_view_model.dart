@@ -1,8 +1,6 @@
 import 'package:hasicx/core/index.dart';
 
 class PlayerViewModel extends ViewStateProvider {
-  LocalDatabase database = LocalDatabase.getInstance();
-
   bool _isCurrentSongFav =
       getIt<MusicPlayerProvider>().isPlayingSongMarkedFavourite;
   bool get isCurrentSongFav => _isCurrentSongFav;
@@ -11,26 +9,18 @@ class PlayerViewModel extends ViewStateProvider {
     notifyListeners();
   }
 
-  // Future<String?> toggleFav() async {
-  //   setViewState(ViewState.busy);
+  bool get isQueueEmpty =>
+      getIt<MusicPlayerProvider>().currentPlayingSongs.isEmpty;
 
-  //   try {
-  //     final isSucceed = await database.addToFav(
-  //       uri: getIt<MusicPlayerProvider>().currentyPlaying.uri ?? '',
-  //       toggle: isCurrentSongFav,
-  //     );
+  bool _showQueue = false;
+  bool get showQueue => _showQueue;
+  set showQueue(bool value) {
+    _showQueue = value;
+    notifyListeners();
+  }
 
-  //     if (isSucceed) {
-  //       database.getIsFav(
-  //         uri: getIt<MusicPlayerProvider>().currentyPlaying.uri ?? '',
-  //       );
-  //     }
-  //   } catch (e) {
-  //     return e.toString();
-  //   }
-
-  //   setViewState(ViewState.complete);
-
-  //   return null;
-  // }
+  void toggleQueueVisibility() {
+    _showQueue = !showQueue;
+    notifyListeners();
+  }
 }

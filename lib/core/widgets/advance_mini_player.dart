@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hasicx/common/index.dart' show MiniPlayer;
-import 'package:hasicx/core/index.dart' show MusicPlayerProvider, PlayerState;
-import 'package:hasicx/core/services/index.dart';
+import 'package:hasicx/core/index.dart'
+    show MusicPlayerProvider, PlayerState, Song, getIt;
 import 'package:provider/provider.dart';
 
 class AdvanceMiniPlayer extends StatelessWidget {
@@ -16,12 +16,12 @@ class AdvanceMiniPlayer extends StatelessWidget {
       builder: (_, state, _) {
         if (state == PlayerState.idle) return SizedBox.shrink();
 
-        return Selector<MusicPlayerProvider, int>(
-          selector: (_, vm) => vm.currentIndex,
+        return Selector<MusicPlayerProvider, Song>(
+          selector: (_, vm) => vm.currentyPlaying,
           builder: (_, index, _) => MiniPlayer(
             playerState: state,
             songs: player.currentPlayingSongs,
-            currentIndex: index,
+            currentIndex: player.currentPlayingSongs.indexOf(index),
             onPlayPauseCallback: (isPlaying) {
               if (isPlaying) {
                 player.pauseSong();
