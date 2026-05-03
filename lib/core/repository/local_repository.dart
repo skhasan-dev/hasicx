@@ -12,7 +12,7 @@ abstract interface class LocalRepository {
 
   // ── Favourites ───────────────────────────────────────────────────────────
 
-  ResultFuture<Unit> setFav({required int songId, required bool isFav});
+  ResultFuture<Unit> setFav({required Song? song, required bool isFav});
 
   ResultFuture<bool> getIsFav(int? songId);
 

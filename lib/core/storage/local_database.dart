@@ -313,8 +313,16 @@ class LocalDatabase {
   /// Toggles the favourite state of a song.
   /// The fav flag lives on the song row — removing a song from a playlist
   /// has zero effect on this value.
-  Future<bool> setFav({required int songId, required bool isFav}) async {
+  Future<bool> setFav({
+    required Map<String, dynamic>? song,
+    required bool isFav,
+  }) async {
+    if (song == null || song['id'] == null) {
+      return false;
+    }
+
     final db = await getDb();
+    final songId = song['id'];
 
     final updated = await db.update(
       _tableSongs,
@@ -323,7 +331,19 @@ class LocalDatabase {
       whereArgs: [songId],
     );
 
-    return updated > 0;
+    // ✅ If not updated → insert FULL song
+    if (updated == 0) {
+      final newSong = Map<String, dynamic>.from(song);
+      newSong[colIsFav] = isFav ? 1 : 0;
+
+      await db.insert(
+        _tableSongs,
+        newSong,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    return true;
   }
 
   /// Returns whether a song is currently marked as favourite.

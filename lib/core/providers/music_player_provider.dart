@@ -216,7 +216,7 @@ class MusicPlayerProvider extends ViewStateProvider {
       isFav: song == null
           ? !isPlayingSongMarkedFavourite
           : !isSelectedSongFavourite,
-      songId: song?.id ?? currentyPlaying.id,
+      song: song ?? currentyPlaying,
     );
 
     result.fold((e) => failure = e, (r) {

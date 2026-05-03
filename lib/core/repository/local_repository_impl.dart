@@ -75,13 +75,13 @@ class LocalRepositoryImpl implements LocalRepository {
   // ─── Favourites ───────────────────────────────────────────────────────────
 
   @override
-  ResultFuture<Unit> setFav({required int? songId, required bool isFav}) async {
-    if (songId == null) {
+  ResultFuture<Unit> setFav({required Song? song, required bool isFav}) async {
+    if (song == null) {
       return const Left(SongNotFound('Cannot set fav on a song with no id.'));
     }
 
     return _guard(() async {
-      final updated = await _db.setFav(songId: songId, isFav: isFav);
+      final updated = await _db.setFav(song: song.toJson(), isFav: isFav);
       if (!updated) {
         throw const SongNotFound('Song not found to update fav state.');
       }
