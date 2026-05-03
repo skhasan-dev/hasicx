@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hasicx/ads/index.dart' show BannerAdWidget, kBANNERAD2;
 import 'package:hasicx/common/index.dart'
     show AppTextStyles, AppColors, SongTile, NoDataFound;
 import 'package:hasicx/core/index.dart'
@@ -198,7 +199,13 @@ class _PlaylistSongsViewState extends State<PlaylistSongsView> {
                 ),
         ),
 
-        bottomNavigationBar: AdvanceMiniPlayer(),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AdvanceMiniPlayer(),
+            BannerAdWidget(adKey: kBANNERAD2),
+          ],
+        ),
       ),
     );
   }

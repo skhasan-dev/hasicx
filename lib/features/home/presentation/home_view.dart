@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hasicx/ads/index.dart'
+    show BannerAdWidget, kBANNERAD, kINTERSTITIALAD;
 import 'package:hasicx/common/index.dart';
 import 'package:hasicx/core/index.dart';
-import 'package:hasicx/core/widgets/index.dart';
 import 'package:hasicx/features/favourites/presentation/favourites_view.dart';
 import 'package:hasicx/features/home/presentation/view_models/home_view_model.dart';
 import 'package:hasicx/features/home/presentation/widgets/dashboard.dart';
@@ -19,11 +23,50 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   HomeViewModel homeViewModel = HomeViewModel();
   final player = getIt<MusicPlayerProvider>();
-
   late TabController tabController = TabController(length: 3, vsync: this);
+
+  late InterstitialAd ads;
+  bool isInterLoaded = false;
+
+  void initInterAd() {
+    InterstitialAd.load(
+      adUnitId: kINTERSTITIALAD,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ads = ad;
+          setState(() {
+            isInterLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (error) {
+          ads.dispose();
+        },
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    initInterAd();
+    Timer(Duration(seconds: 5), () {
+      if (isInterLoaded) {
+        ads.fullScreenContentCallback = FullScreenContentCallback(
+          onAdDismissedFullScreenContent: (ad) {
+            ad.dispose();
+            isInterLoaded = false;
+            initInterAd();
+          },
+          onAdFailedToShowFullScreenContent: (ad, error) {
+            isInterLoaded = false;
+            ad.dispose();
+          },
+        );
+
+        ads.show();
+      }
+    });
   }
 
   @override
@@ -63,7 +106,13 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           children: [Dashboard(), FavouritesView(), PlaylistView()],
         ),
 
-        bottomNavigationBar: AdvanceMiniPlayer(),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AdvanceMiniPlayer(),
+            BannerAdWidget(adKey: kBANNERAD),
+          ],
+        ),
       ),
     );
   }
