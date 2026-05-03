@@ -181,7 +181,7 @@ class MusicPlayerProvider extends ViewStateProvider {
     SharedPrefs.setLoopMode(mode);
   }
 
-  Future<String?> getSongs({
+  Future<Failure?> getSongs({
     OrderType? orderType,
     SongSortType? songSortType,
     UriType? uriType,
@@ -199,7 +199,7 @@ class MusicPlayerProvider extends ViewStateProvider {
 
       allSongs = songs.toSong;
     } catch (e) {
-      return e.toString();
+      return AppFailure(e.toString());
     }
 
     setViewState(ViewState.complete);
