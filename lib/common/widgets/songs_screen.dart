@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hasicx/common/index.dart' show NoDataFound;
 import 'package:hasicx/common/theme/colors.dart';
 import 'package:hasicx/common/theme/text_styles.dart';
 import 'package:hasicx/common/widgets/song_tile.dart';
@@ -37,10 +38,24 @@ class _SongselectionViewState extends State<SongselectionView> {
           valueListenable: songsNotifier,
           builder: (context, value, child) {
             if (value.isEmpty) {
-              return Center(child: Text('No Soungs Found'));
+              return Center(
+                child: NoDataFound(
+                  icon: Icon(Icons.music_note, size: 96),
+                  title: Text(
+                    "No songs available",
+                    style: AppTextStyles.s16W600,
+                  ),
+                  subtitle: Text(
+                    "Looks like your library is empty. Add songs to get started.",
+                    style: AppTextStyles.s12W400,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
             }
 
             return ListView.separated(
+              physics: BouncingScrollPhysics(),
               itemBuilder: (_, index) {
                 return SongTile(
                   song: value[index],
@@ -63,33 +78,45 @@ class _SongselectionViewState extends State<SongselectionView> {
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      bottomNavigationBar: Container(
-        color: AppColors.bgColor,
-        width: double.maxFinite,
-        padding: EdgeInsets.only(right: 16, left: 16, bottom: 60, top: 4),
-        child: ElevatedButton(
-          onPressed: () {
-            context.pop(selectedSongList.value);
-          },
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            backgroundColor: AppColors.buttonColor,
-          ),
-          child: ValueListenableBuilder(
-            valueListenable: selectedSongList,
-            builder: (context, value, child) {
-              return Text(
-                'Add ${selectedSongList.value.length} Selected Song',
-                style: AppTextStyles.s16W400.copyWith(
-                  color: AppColors.textColor,
-                ),
-              );
-            },
-          ),
-        ),
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: songsNotifier,
+        builder: (context, value, child) {
+          return value.isEmpty
+              ? SizedBox.shrink()
+              : Container(
+                  color: AppColors.bgColor,
+                  width: double.maxFinite,
+                  padding: EdgeInsets.only(
+                    right: 16,
+                    left: 16,
+                    bottom: 60,
+                    top: 4,
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.pop(selectedSongList.value);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: AppColors.buttonColor,
+                    ),
+                    child: ValueListenableBuilder(
+                      valueListenable: selectedSongList,
+                      builder: (context, value, child) {
+                        return Text(
+                          'Add ${selectedSongList.value.length} Selected Song',
+                          style: AppTextStyles.s16W400.copyWith(
+                            color: AppColors.textColor,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+        },
       ),
     );
   }

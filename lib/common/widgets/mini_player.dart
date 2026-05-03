@@ -78,16 +78,23 @@ class MiniPlayer extends StatelessWidget {
                               children: [
                                 SizedBox(
                                   height: 24,
-                                  child: Marquee(
-                                    text: songs.isEmpty
-                                        ? '-'
-                                        : songs[currentIndex].name,
-                                    style: AppTextStyles.s14W600,
-                                    scrollAxis: Axis.horizontal,
-                                    blankSpace: 40.0,
-                                    velocity: 50.0,
-                                    pauseAfterRound: Duration(seconds: 1),
-                                  ),
+                                  child: songs[currentIndex].name.length > 20
+                                      ? Marquee(
+                                          text: songs.isEmpty
+                                              ? '-'
+                                              : songs[currentIndex].name,
+                                          style: AppTextStyles.s14W600,
+                                          scrollAxis: Axis.horizontal,
+                                          blankSpace: 40.0,
+                                          velocity: 50.0,
+                                          pauseAfterRound: Duration(seconds: 1),
+                                        )
+                                      : Text(
+                                          songs.isEmpty
+                                              ? '-'
+                                              : songs[currentIndex].name,
+                                          style: AppTextStyles.s14W600,
+                                        ),
                                 ),
                                 Text(
                                   songs.isEmpty

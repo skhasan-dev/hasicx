@@ -25,7 +25,7 @@ class SongController extends StatelessWidget {
                   onChangeEnd: (value) => vm.seekTo(value),
                   onChanged: vm.updateSliderUI,
                   min: Duration(seconds: 0).inSeconds.toDouble(),
-                  max: vm.maxSliderValue > 0.0 ? vm.maxSliderValue : 999,
+                  max: vm.maxSliderValue > 0.0 ? vm.maxSliderValue : 99999,
                 ),
               ),
               Text(vm.length, style: AppTextStyles.s12W400),

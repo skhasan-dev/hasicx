@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasicx/common/index.dart';
 import 'package:hasicx/core/index.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -102,7 +103,11 @@ class _SplashViewState extends State<SplashView> {
 
       if (!mounted) return;
 
-      await context.read<MusicPlayerProvider>().getSongs();
+      await context.read<MusicPlayerProvider>().getSongs(
+        orderType: OrderType.DESC_OR_GREATER,
+        songSortType: SongSortType.DATE_ADDED,
+        uriType: UriType.EXTERNAL,
+      );
 
       if (!mounted) return;
 
