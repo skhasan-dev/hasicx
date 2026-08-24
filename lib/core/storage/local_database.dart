@@ -138,48 +138,41 @@ class LocalDatabase {
     }
   }
 
-  /// Migrates data from the v1 flat schema to v2.
-  /// Old tables are renamed for backup, new tables created fresh,
-  /// then existing songs + playlists are migrated safely.
   Future<void> _migrateV1ToV2(Database db) async {
-    // 1. Rename old tables to backup
-    await db.execute('ALTER TABLE songs     RENAME TO songs_v1_backup');
-    await db.execute('ALTER TABLE playlist  RENAME TO playlists_v1_backup');
+    // 1. Rename old tables (exact V1 names, case-sensitive)
+    await db.execute('ALTER TABLE SongInfo  RENAME TO songs_v1_backup');
+    await db.execute('ALTER TABLE Playlists RENAME TO playlists_v1_backup');
 
     // 2. Create new schema
     await _createTablesV2(db);
 
-    // 3. Migrate playlists
+    // 3. Migrate playlists (V1 column is 'Playlist', capital P)
     final oldPlaylists = await db.query('playlists_v1_backup');
     for (final row in oldPlaylists) {
       await db.insert(_tablePlaylists, {
-        colPlaylistName: row['playlist'] as String,
+        colPlaylistName: row['Playlist'] as String,
         colCreatedAt: DateTime.now().toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
 
-    // 4. Migrate songs
-    // Old schema had playlist TEXT on each song row.
-    // We insert the song once into songs, then link via playlist_songs.
+    // 4. Migrate songs (all V1 columns are PascalCase)
     final oldSongs = await db.query('songs_v1_backup');
     for (final row in oldSongs) {
-      final songId = row['artwork_id'] as int? ?? 0;
-      final playlistName = row['playlist'] as String? ?? '';
+      final songId = row['Artwork_ID'] as int? ?? 0;
+      final playlistName = row['Playlist'] as String? ?? '';
 
-      // Upsert into songs (ignore if already inserted from another playlist)
       await db.insert(_tableSongs, {
         colId: songId,
         colArtworkId: songId,
-        colName: row['name'] ?? '',
-        colArtist: row['artist'] ?? '',
-        colAlbum: row['album'] ?? '',
-        colUri: row['uri'] ?? '',
-        colIsFav: _parseBool(row['fav']) ? 1 : 0,
+        colName: row['Name'] ?? '',
+        colArtist: row['Artist'] ?? '',
+        colAlbum: '', // V1 had no album column
+        colUri: row['Uri'] ?? '',
+        colIsFav: _parseBool(row['Fav']) ? 1 : 0,
         colPlayCount: 0,
         colLastPlayedAt: null,
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
 
-      // Link song to its playlist
       if (playlistName.isNotEmpty) {
         final plResult = await db.query(
           _tablePlaylists,
@@ -199,7 +192,7 @@ class LocalDatabase {
       }
     }
 
-    // 5. Drop backup tables (comment these out if you want to keep them for safety)
+    // 5. Drop backups
     await db.execute('DROP TABLE IF EXISTS songs_v1_backup');
     await db.execute('DROP TABLE IF EXISTS playlists_v1_backup');
   }
